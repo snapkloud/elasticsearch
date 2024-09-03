@@ -10,6 +10,8 @@ package org.elasticsearch.discovery.ec2;
 
 import com.amazonaws.SDKGlobalConfiguration;
 import com.amazonaws.util.StringUtils;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +46,7 @@ class AwsEc2Utils {
         return SocketAccess.doPrivileged(() -> {
             HttpURLConnection urlConnection;
             try {
-                urlConnection = (HttpURLConnection) new URL(metadataTokenUrl).openConnection();
+                urlConnection = (HttpURLConnection) Urls.create(metadataTokenUrl, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS).openConnection();
                 urlConnection.setRequestMethod("PUT");
                 // Use both timeout for connect and read timeout analogous to AWS SDK.
                 // See com.amazonaws.internal.HttpURLConnection#connectToEndpoint

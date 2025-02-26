@@ -8,6 +8,7 @@
 
 package org.elasticsearch;
 
+import io.github.pixee.security.BoundedLineReader;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.core.UpdateForV9;
 import org.elasticsearch.internal.BuildExtension;
@@ -54,7 +55,7 @@ public class ReleaseVersions {
             NavigableMap<Integer, List<Version>> versions = new TreeMap<>();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(versionsFile, StandardCharsets.UTF_8))) {
                 String line;
-                while ((line = reader.readLine()) != null) {
+                while ((line = BoundedLineReader.readLine(reader, 5_000_000)) != null) {
                     var matcher = VERSION_LINE.matcher(line);
                     if (matcher.matches() == false) {
                         throw new IOException(Strings.format("Incorrect format for line [%s] in [%s]", line, versionsFileName));

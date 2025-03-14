@@ -7,6 +7,8 @@
 
 package org.elasticsearch.xpack.security.enrollment.tool;
 
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import joptsimple.OptionSet;
 
 import com.google.common.jimfs.Configuration;
@@ -114,7 +116,7 @@ public class CreateEnrollmentTokenToolTests extends CommandTestCase {
         this.client = mock(CommandLineHttpClient.class);
         when(client.getDefaultURL()).thenReturn("https://localhost:9200");
 
-        URL url = new URL(client.getDefaultURL());
+        URL url = Urls.create(client.getDefaultURL(), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
         HttpResponse healthResponse = new HttpResponse(HttpURLConnection.HTTP_OK, Map.of("status", randomFrom("yellow", "green")));
         when(
             client.execute(
@@ -207,7 +209,7 @@ public class CreateEnrollmentTokenToolTests extends CommandTestCase {
 
     public void testUnhealthyCluster() throws Exception {
         String scope = randomBoolean() ? "node" : "kibana";
-        URL url = new URL(client.getDefaultURL());
+        URL url = Urls.create(client.getDefaultURL(), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
         HttpResponse healthResponse = new HttpResponse(HttpURLConnection.HTTP_OK, Map.of("status", randomFrom("red")));
         when(
             client.execute(
@@ -258,6 +260,6 @@ public class CreateEnrollmentTokenToolTests extends CommandTestCase {
     }
 
     private URL clusterHealthUrl(URL url) throws MalformedURLException, URISyntaxException {
-        return new URL(url, (url.toURI().getPath() + "/_cluster/health").replaceAll("//+", "/") + "?pretty");
+        return Urls.create(url, (url.toURI().getPath() + "/_cluster/health").replaceAll("//+", "/") + "?pretty", Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
     }
 }
